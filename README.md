@@ -4,7 +4,7 @@
 
 ### AI & Machine Learning Student | Python Developer | Future AI/ML Engineer
 
-<img src="./images/profile.png" width="220" alt="Tanmoy Das"/>
+<img src="./profile.png" width="220" alt="Tanmoy Das"/>
 
 <p>
 <a href="https://www.linkedin.com/in/tanmoy-das-719379314/" target="_blank">
