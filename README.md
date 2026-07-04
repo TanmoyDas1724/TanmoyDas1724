@@ -2,30 +2,30 @@
 
 # 👋 Hi, I'm Tanmoy Das
 
-### AI & Machine Learning Student | Python Developer | Future AI/ML Engineer
+### AI & Machine Learning Student • Python Developer • Future AI/ML Engineer
 
-<img src="./profile.png" width="220" alt="Tanmoy Das"/>
+<img src="./profile.png" width="180" style="border-radius:50%;" alt="Tanmoy Das"/>
 
-<p>
-<a href="https://www.linkedin.com/in/tanmoy-das-719379314/" target="_blank">
+<p align="center">
+<a href="https://www.linkedin.com/in/tanmoy-das-719379314/">
 <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/>
 </a>
 
-<a href="https://github.com/TanmoyDas1724" target="_blank">
+<a href="https://github.com/TanmoyDas1724">
 <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white"/>
 </a>
 
-</p>
+<img src="https://komarev.com/ghpvc/?username=TanmoyDas1724&label=Profile%20Views&color=0e75b6&style=for-the-badge"/>
 
-![](https://komarev.com/ghpvc/?username=TanmoyDas1724&color=0e75b6)
+</p>
 
 </div>
 
 ---
 
-# 💫 About Me
+# 🚀 About Me
 
-🎓 B.Tech Student (CSE - Artificial Intelligence & Machine Learning)
+🎓 **B.Tech (CSE - Artificial Intelligence & Machine Learning)**
 
 🏫 Haldia Institute of Technology
 
@@ -33,7 +33,7 @@
 
 💡 Passionate about Artificial Intelligence, Machine Learning, Deep Learning and Computer Vision.
 
-🚀 My goal is to become an AI/ML Engineer and build intelligent systems that solve real-world problems.
+🎯 Currently preparing for **AI/ML Internship (2028 Batch)**.
 
 ---
 
@@ -46,111 +46,98 @@
 - OpenCV
 - YOLO
 - LangChain
-- RAG (Retrieval-Augmented Generation)
+- RAG
 - Large Language Models (LLMs)
 
 ---
 
 # 🛠 Tech Stack
 
-### Programming Languages
+### Languages
 
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+<p>
+<img src="https://skillicons.dev/icons?i=python,c,mysql,mongodb" />
+</p>
 
-![SQL](https://img.shields.io/badge/SQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+### AI / ML
 
-![C](https://img.shields.io/badge/C-00599C?style=for-the-badge&logo=c&logoColor=white)
+<p>
+<img src="https://skillicons.dev/icons?i=tensorflow,pytorch,opencv" />
+</p>
 
----
-
-### Machine Learning
-
-![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)
-
-![Keras](https://img.shields.io/badge/Keras-D00000?style=for-the-badge&logo=keras&logoColor=white)
-
-![Scikit Learn](https://img.shields.io/badge/Scikit--Learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
-
-![OpenCV](https://img.shields.io/badge/OpenCV-27338E?style=for-the-badge&logo=opencv&logoColor=white)
-
-![NumPy](https://img.shields.io/badge/NumPy-013243?style=for-the-badge&logo=numpy&logoColor=white)
-
-![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)
-
-![Matplotlib](https://img.shields.io/badge/Matplotlib-11557C?style=for-the-badge)
-
----
-
-### Databases
-
-![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
-
-![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
-
----
+<p>
+<img src="https://img.shields.io/badge/Scikit--Learn-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white"/>
+<img src="https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white"/>
+<img src="https://img.shields.io/badge/NumPy-013243?style=for-the-badge&logo=numpy&logoColor=white"/>
+<img src="https://img.shields.io/badge/Matplotlib-11557C?style=for-the-badge"/>
+</p>
 
 ### Tools
 
-![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)
-
-![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
-
-![VS Code](https://img.shields.io/badge/VS%20Code-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white)
-
-![Jupyter](https://img.shields.io/badge/Jupyter-F37626?style=for-the-badge&logo=jupyter&logoColor=white)
+<p>
+<img src="https://skillicons.dev/icons?i=git,github,vscode" />
+<img src="https://img.shields.io/badge/Jupyter-F37626?style=for-the-badge&logo=jupyter&logoColor=white"/>
+</p>
 
 ---
 
-# 🚀 Featured Repositories
+# 🚀 Featured Projects
 
-⭐ Climate_Visibility_Machine_Learning
-
-⭐ SQL-Daily-Progress
-
-⭐ MongoDB-pymongo
-
-⭐ Strivers-A2Z-DSA-Sheet-Python
-
-⭐ PWSKILLS_Assignment1
+- 🌍 Climate Visibility Machine Learning
+- 🗄 SQL Daily Progress
+- 🍃 MongoDB CRUD using PyMongo
+- 📚 Striver A2Z DSA Sheet (Python)
+- 📖 PW Skills Assignments
 
 ---
 
 # 📊 GitHub Statistics
 
-![](https://github-readme-stats.vercel.app/api?username=TanmoyDas1724&show_icons=true&theme=tokyonight&hide_border=true)
+<p align="center">
 
-![](https://github-readme-streak-stats.herokuapp.com/?user=TanmoyDas1724&theme=tokyonight&hide_border=true)
+<img height="170" src="https://github-readme-stats.vercel.app/api?username=TanmoyDas1724&show_icons=true&theme=tokyonight&hide_border=true"/>
 
-![](https://github-readme-stats.vercel.app/api/top-langs/?username=TanmoyDas1724&layout=compact&theme=tokyonight&hide_border=true)
+<img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=TanmoyDas1724&layout=compact&theme=tokyonight&hide_border=true"/>
+
+</p>
+
+<p align="center">
+
+<img src="https://streak-stats.demolab.com?user=TanmoyDas1724&theme=tokyonight&hide_border=true"/>
+
+</p>
 
 ---
 
-# 🏆 GitHub Trophies
+# 🎯 Goals for 2026
 
-![](https://github-profile-trophy.vercel.app/?username=TanmoyDas1724&theme=tokyonight&no-frame=true&margin-w=15)
+✅ Master Deep Learning
 
----
+✅ Build 25+ AI Projects
 
-# 🎯 2026 Goals
+✅ Learn Computer Vision
 
-- Build 25+ AI & ML Projects
-- Master Deep Learning
-- Learn Computer Vision
-- Build Generative AI Applications
-- Contribute to Open Source
-- Secure an AI/ML Internship
+✅ Learn Generative AI
+
+✅ Learn RAG & LangChain
+
+✅ Crack an AI/ML Internship
 
 ---
 
 # 📫 Connect With Me
 
-💼 LinkedIn
+<p>
 
-https://www.linkedin.com/in/tanmoy-das-719379314/
+<a href="https://www.linkedin.com/in/tanmoy-das-719379314/">
+<img src="https://img.shields.io/badge/LinkedIn-0077B5?style=flat-square&logo=linkedin&logoColor=white"/>
+</a>
 
-💻 GitHub
+<a href="https://github.com/TanmoyDas1724">
+<img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white"/>
+</a>
 
-https://github.com/TanmoyDas1724
+</p>
 
 ---
 
@@ -158,6 +145,6 @@ https://github.com/TanmoyDas1724
 
 ### ⭐ Thanks for visiting my profile! ⭐
 
-If you like my work, consider giving a ⭐ to my repositories.
+*"Learning one model at a time, building one project at a time."*
 
 </div>
