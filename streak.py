@@ -1,86 +1,108 @@
+import os
+import json
 import urllib.request
-import re
-from datetime import datetime, timedelta, timezone
+from datetime import date, timedelta
+
 
 USERNAME = "TanmoyDas1724"
+TOKEN = os.environ["GH_TOKEN"]
 
-URL = f"https://github.com/{USERNAME}"
+today = date.today()
+start_date = today - timedelta(days=365)
+
+
+query = """
+query($from: DateTime!, $to: DateTime!) {
+  viewer {
+    contributionsCollection(from: $from, to: $to) {
+      contributionCalendar {
+        totalContributions
+        weeks {
+          contributionDays {
+            date
+            contributionCount
+          }
+        }
+      }
+    }
+  }
+}
+"""
+
+
+variables = {
+    "from": f"{start_date}T00:00:00Z",
+    "to": f"{today}T23:59:59Z"
+}
+
+
+payload = json.dumps({
+    "query": query,
+    "variables": variables
+}).encode("utf-8")
+
 
 request = urllib.request.Request(
-    URL,
+    "https://api.github.com/graphql",
+    data=payload,
     headers={
-        "User-Agent": "Mozilla/5.0"
+        "Authorization": f"Bearer {TOKEN}",
+        "Content-Type": "application/json",
+        "User-Agent": USERNAME
     }
 )
 
+
 with urllib.request.urlopen(request) as response:
-    html = response.read().decode("utf-8")
+    result = json.load(response)
 
 
-# GitHub's contribution calendar contains contribution-day elements.
-# Extract dates and contribution levels from the profile page.
+if "errors" in result:
+    raise RuntimeError(result["errors"])
 
-pattern = r'<td[^>]*data-date="([^"]+)"[^>]*data-level="([^"]+)"[^>]*>'
 
-matches = re.findall(pattern, html)
+calendar = result["data"]["viewer"]["contributionsCollection"]["contributionCalendar"]
+
 
 days = {}
 
-for date_string, level in matches:
-    try:
-        contribution_date = datetime.strptime(
-            date_string, "%Y-%m-%d"
-        ).date()
+for week in calendar["weeks"]:
+    for contribution_day in week["contributionDays"]:
+        day = contribution_day["date"]
+        count = contribution_day["contributionCount"]
 
-        days[contribution_date] = int(level)
-
-    except ValueError:
-        continue
+        days[day] = count
 
 
-if not days:
-    raise RuntimeError(
-        "Could not read GitHub contribution calendar."
-    )
-
-
-# GitHub's contribution level:
-# 0 = no contribution
-# 1-4 = contribution activity
-#
-# Calculate the current continuous streak.
-
-today = datetime.now().date()
-
-
-def has_contribution(day):
-    return days.get(day, 0) > 0
-
-
-# GitHub's calendar may not yet contain today's activity
-# depending on timezone/update timing.
-if has_contribution(today):
-    current = today
-else:
-    current = today - timedelta(days=1)
-
+# --------------------------------------------------
+# Calculate current streak
+# --------------------------------------------------
 
 streak = 0
+current = today
 
-while has_contribution(current):
+
+# If today's contribution has not appeared yet,
+# start from yesterday.
+if days.get(current.isoformat(), 0) == 0:
+    current -= timedelta(days=1)
+
+
+while days.get(current.isoformat(), 0) > 0:
     streak += 1
     current -= timedelta(days=1)
 
 
-print("================================")
-print("GitHub Coding Streak")
-print("================================")
-print(f"Days detected: {streak}")
-print(f"Latest date checked: {today}")
-print("================================")
+print("--------------------------------")
+print(f"Username: {USERNAME}")
+print(f"Total contributions: {calendar['totalContributions']}")
+print(f"Current streak: {streak} days")
+print("--------------------------------")
 
 
+# --------------------------------------------------
 # Generate SVG
+# --------------------------------------------------
 
 svg = f'''<svg width="700" height="220"
 viewBox="0 0 700 220"
@@ -131,7 +153,9 @@ Tanmoy Das • Keep building. Keep learning.
 </svg>
 '''
 
+
 with open("streak.svg", "w", encoding="utf-8") as file:
     file.write(svg)
+
 
 print(f"Generated streak.svg with {streak} days.")
