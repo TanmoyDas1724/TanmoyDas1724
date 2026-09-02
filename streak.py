@@ -1,76 +1,119 @@
-import re
+import os
+import json
 import urllib.request
-from datetime import datetime, timedelta
+from datetime import date, timedelta
+
 
 USERNAME = "TanmoyDas1724"
+TOKEN = os.environ["GH_TOKEN"]
 
-# GitHub's contribution calendar endpoint
-url = f"https://github.com/users/{USERNAME}/contributions"
+
+# GitHub GraphQL API
+query = """
+query($from: DateTime!, $to: DateTime!) {
+  user(login: "TanmoyDas1724") {
+    contributionsCollection(from: $from, to: $to) {
+      contributionCalendar {
+        totalContributions
+        restrictedContributionsCount
+        weeks {
+          contributionDays {
+            date
+            contributionCount
+          }
+        }
+      }
+    }
+  }
+}
+"""
+
+
+today = date.today()
+
+# Look back 1 year
+start_date = today - timedelta(days=365)
+
+variables = {
+    "from": f"{start_date}T00:00:00Z",
+    "to": f"{today}T23:59:59Z"
+}
+
+
+payload = json.dumps({
+    "query": query,
+    "variables": variables
+}).encode("utf-8")
+
 
 request = urllib.request.Request(
-    url,
+    "https://api.github.com/graphql",
+    data=payload,
     headers={
-        "User-Agent": "Mozilla/5.0"
-    }
+        "Authorization": f"Bearer {TOKEN}",
+        "Content-Type": "application/json",
+        "User-Agent": "TanmoyDas1724-streak"
+    },
+    method="POST"
 )
+
 
 with urllib.request.urlopen(request) as response:
-    html = response.read().decode("utf-8")
+    result = json.loads(response.read().decode("utf-8"))
 
 
-# Extract contribution dates and contribution levels
-matches = re.findall(
-    r'data-date="(\d{4}-\d{2}-\d{2})"[^>]*data-level="(\d+)"',
-    html
+if "errors" in result:
+    raise RuntimeError(result["errors"])
+
+
+calendar = (
+    result["data"]
+    ["user"]
+    ["contributionsCollection"]
+    ["contributionCalendar"]
 )
 
-if not matches:
-    # GitHub may put data-level before data-date
-    matches = re.findall(
-        r'data-level="(\d+)"[^>]*data-date="(\d{4}-\d{2}-\d{2})"',
-        html
-    )
 
-    matches = [
-        (date, level)
-        for level, date in matches
-    ]
+total_contributions = calendar["totalContributions"]
+private_contributions = calendar["restrictedContributionsCount"]
 
 
-if not matches:
-    raise RuntimeError(
-        "Could not read GitHub contribution calendar."
-    )
-
+# ---------------------------------------
+# Collect contribution days
+# ---------------------------------------
 
 days = {}
 
-for date_string, level in matches:
-    days[date_string] = int(level)
+for week in calendar["weeks"]:
+    for contribution_day in week["contributionDays"]:
+
+        day = contribution_day["date"]
+        count = contribution_day["contributionCount"]
+
+        days[day] = count
 
 
 # ---------------------------------------
 # Calculate current streak
 # ---------------------------------------
 
-today = datetime.now().date()
+current_day = today
+
+# If today has no contribution yet,
+# start checking from yesterday.
+if days.get(current_day.isoformat(), 0) == 0:
+    current_day -= timedelta(days=1)
+
 
 streak = 0
-current = today
 
-# If GitHub hasn't updated today's contribution yet,
-# start from yesterday.
-if days.get(current.isoformat(), 0) == 0:
-    current -= timedelta(days=1)
-
-
-while days.get(current.isoformat(), 0) > 0:
+while days.get(current_day.isoformat(), 0) > 0:
     streak += 1
-    current -= timedelta(days=1)
+    current_day -= timedelta(days=1)
 
 
 # ---------------------------------------
-# Diagnostic output
+# Print diagnostic information
 # ---------------------------------------
 
 print("====================================")
@@ -78,6 +121,8 @@ print("       GITHUB CODING STREAK")
 print("====================================")
 
 print(f"Username: {USERNAME}")
+print(f"Total contributions: {total_contributions}")
+print(f"Private contributions: {private_contributions}")
 print(f"Current streak: {streak} days")
 
 print("")
@@ -87,14 +132,13 @@ check_day = today
 
 for _ in range(15):
 
-    date_string = check_day.isoformat()
-    count_level = days.get(date_string, 0)
+    day_string = check_day.isoformat()
+    count = days.get(day_string, 0)
 
-    print(
-        f"{date_string}: level {count_level}"
-    )
+    print(f"{day_string}: {count} contributions")
 
     check_day -= timedelta(days=1)
+
 
 print("====================================")
 
@@ -157,7 +201,9 @@ Tanmoy Das • Keep building. Keep learning.
 </svg>
 '''
 
+
 with open("streak.svg", "w", encoding="utf-8") as file:
     file.write(svg)
+
 
 print(f"Generated streak.svg with {streak} days.")
