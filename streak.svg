@@ -12,9 +12,9 @@ xmlns="http://www.w3.org/2000/svg">
     x="350"
     y="55"
     text-anchor="middle"
-    font-family="Arial, sans-serif"
+    font-family="Arial"
     font-size="24"
-    fill="#ffffff">
+    fill="white">
 🔥 CODING STREAK
 </text>
 
@@ -22,28 +22,28 @@ xmlns="http://www.w3.org/2000/svg">
     x="350"
     y="125"
     text-anchor="middle"
-    font-family="Arial, sans-serif"
+    font-family="Arial"
     font-size="58"
     font-weight="bold"
     fill="#ff7b72">
-1 DAYS
+68 DAYS
 </text>
 
 <text
     x="350"
     y="165"
     text-anchor="middle"
-    font-family="Arial, sans-serif"
+    font-family="Arial"
     font-size="18"
     fill="#c9d1d9">
-Public + Private Contributions
+Public + Private Commits
 </text>
 
 <text
     x="350"
     y="195"
     text-anchor="middle"
-    font-family="Arial, sans-serif"
+    font-family="Arial"
     font-size="14"
     fill="#8b949e">
 Tanmoy Das • Keep building. Keep learning.
