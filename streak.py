@@ -1,131 +1,130 @@
-import os
-import json
 import urllib.request
-from datetime import date, timedelta
-
+import re
+from datetime import datetime, timedelta, timezone
 
 USERNAME = "TanmoyDas1724"
-TOKEN = os.environ["GH_TOKEN"]
 
-today = date.today()
-start_date = today - timedelta(days=365)
-
-query = """
-query($from: DateTime!, $to: DateTime!) {
-  viewer {
-    contributionsCollection(from: $from, to: $to) {
-      contributionCalendar {
-        totalContributions
-        weeks {
-          contributionDays {
-            date
-            contributionCount
-          }
-        }
-      }
-    }
-  }
-}
-"""
-
-variables = {
-    "from": f"{start_date}T00:00:00Z",
-    "to": f"{today}T23:59:59Z"
-}
-
-payload = json.dumps({
-    "query": query,
-    "variables": variables
-}).encode("utf-8")
+URL = f"https://github.com/{USERNAME}"
 
 request = urllib.request.Request(
-    "https://api.github.com/graphql",
-    data=payload,
+    URL,
     headers={
-        "Authorization": f"Bearer {TOKEN}",
-        "Content-Type": "application/json",
-        "User-Agent": USERNAME
+        "User-Agent": "Mozilla/5.0"
     }
 )
 
 with urllib.request.urlopen(request) as response:
-    result = json.load(response)
+    html = response.read().decode("utf-8")
 
-if "errors" in result:
-    raise RuntimeError(result["errors"])
 
-calendar = result["data"]["viewer"]["contributionsCollection"]["contributionCalendar"]
+# GitHub's contribution calendar contains contribution-day elements.
+# Extract dates and contribution levels from the profile page.
+
+pattern = r'<td[^>]*data-date="([^"]+)"[^>]*data-level="([^"]+)"[^>]*>'
+
+matches = re.findall(pattern, html)
 
 days = {}
 
-for week in calendar["weeks"]:
-    for day in week["contributionDays"]:
-        days[day["date"]] = day["contributionCount"]
+for date_string, level in matches:
+    try:
+        contribution_date = datetime.strptime(
+            date_string, "%Y-%m-%d"
+        ).date()
+
+        days[contribution_date] = int(level)
+
+    except ValueError:
+        continue
 
 
-# Calculate current streak
+if not days:
+    raise RuntimeError(
+        "Could not read GitHub contribution calendar."
+    )
+
+
+# GitHub's contribution level:
+# 0 = no contribution
+# 1-4 = contribution activity
+#
+# Calculate the current continuous streak.
+
+today = datetime.now().date()
+
+
+def has_contribution(day):
+    return days.get(day, 0) > 0
+
+
+# GitHub's calendar may not yet contain today's activity
+# depending on timezone/update timing.
+if has_contribution(today):
+    current = today
+else:
+    current = today - timedelta(days=1)
+
+
 streak = 0
-current_day = today
 
-while True:
-    day_string = current_day.isoformat()
-
-    if days.get(day_string, 0) > 0:
-        streak += 1
-        current_day -= timedelta(days=1)
-    else:
-        break
+while has_contribution(current):
+    streak += 1
+    current -= timedelta(days=1)
 
 
-# If today has no contribution yet, allow yesterday's streak
-if streak == 0:
-    yesterday = today - timedelta(days=1)
-
-    if days.get(yesterday.isoformat(), 0) > 0:
-        current_day = yesterday
-        streak = 0
-
-        while days.get(current_day.isoformat(), 0) > 0:
-            streak += 1
-            current_day -= timedelta(days=1)
+print("================================")
+print("GitHub Coding Streak")
+print("================================")
+print(f"Days detected: {streak}")
+print(f"Latest date checked: {today}")
+print("================================")
 
 
-svg = f'''<svg width="700" height="220" viewBox="0 0 700 220"
+# Generate SVG
+
+svg = f'''<svg width="700" height="220"
+viewBox="0 0 700 220"
 xmlns="http://www.w3.org/2000/svg">
 
-<rect width="700" height="220" rx="20"
-fill="#0d1117"/>
+<rect width="700"
+      height="220"
+      rx="20"
+      fill="#0d1117"/>
 
-<text x="350" y="55"
-text-anchor="middle"
-font-family="Arial, sans-serif"
-font-size="24"
-fill="#ffffff">
+<text x="350"
+      y="55"
+      text-anchor="middle"
+      font-family="Arial, sans-serif"
+      font-size="24"
+      fill="#ffffff">
 🔥 CODING STREAK
 </text>
 
-<text x="350" y="125"
-text-anchor="middle"
-font-family="Arial, sans-serif"
-font-size="58"
-font-weight="bold"
-fill="#ff7b72">
+<text x="350"
+      y="125"
+      text-anchor="middle"
+      font-family="Arial, sans-serif"
+      font-size="58"
+      font-weight="bold"
+      fill="#ff7b72">
 {streak} DAYS
 </text>
 
-<text x="350" y="165"
-text-anchor="middle"
-font-family="Arial, sans-serif"
-font-size="18"
-fill="#c9d1d9">
+<text x="350"
+      y="165"
+      text-anchor="middle"
+      font-family="Arial, sans-serif"
+      font-size="18"
+      fill="#c9d1d9">
 Public + Private Contributions
 </text>
 
-<text x="350" y="195"
-text-anchor="middle"
-font-family="Arial, sans-serif"
-font-size="14"
-fill="#8b949e">
+<text x="350"
+      y="195"
+      text-anchor="middle"
+      font-family="Arial, sans-serif"
+      font-size="14"
+      fill="#8b949e">
 Tanmoy Das • Keep building. Keep learning.
 </text>
 
@@ -135,4 +134,4 @@ Tanmoy Das • Keep building. Keep learning.
 with open("streak.svg", "w", encoding="utf-8") as file:
     file.write(svg)
 
-print(f"Current streak: {streak} days")
+print(f"Generated streak.svg with {streak} days.")
