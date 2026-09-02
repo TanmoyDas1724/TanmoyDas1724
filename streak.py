@@ -1,153 +1,208 @@
 import os
-import json
-import urllib.request
-from datetime import date, timedelta
-
+import requests
+from datetime import datetime, date, timedelta
 
 USERNAME = "TanmoyDas1724"
+STREAK_FILE = "streak_data.txt"
+START_STREAK = 68
+
 TOKEN = os.environ["GH_TOKEN"]
 
-
-# GitHub GraphQL API
-query = """
-query($from: DateTime!, $to: DateTime!) {
-  user(login: "TanmoyDas1724") {
-    contributionsCollection(from: $from, to: $to) {
-      contributionCalendar {
-        totalContributions
-        restrictedContributionsCount
-        weeks {
-          contributionDays {
-            date
-            contributionCount
-          }
-        }
-      }
-    }
-  }
+HEADERS = {
+    "Authorization": f"Bearer {TOKEN}",
+    "Accept": "application/vnd.github+json"
 }
-"""
 
+
+def get_repositories():
+    """Get public + private repositories accessible by the token."""
+
+    repos = []
+    page = 1
+
+    while True:
+        url = (
+            f"https://api.github.com/user/repos"
+            f"?per_page=100&page={page}&affiliation=owner,collaborator"
+        )
+
+        response = requests.get(url, headers=HEADERS)
+
+        if response.status_code != 200:
+            raise Exception(
+                f"Failed to get repositories: "
+                f"{response.status_code} {response.text}"
+            )
+
+        data = response.json()
+
+        if not data:
+            break
+
+        repos.extend(data)
+        page += 1
+
+    return repos
+
+
+def get_commit_dates(repo):
+    """Get dates on which the user made commits."""
+
+    owner = repo["owner"]["login"]
+    name = repo["name"]
+
+    url = (
+        f"https://api.github.com/repos/{owner}/{name}/commits"
+        f"?author={USERNAME}&per_page=100"
+    )
+
+    dates = set()
+    page = 1
+
+    while True:
+
+        url = (
+            f"https://api.github.com/repos/{owner}/{name}/commits"
+            f"?author={USERNAME}&per_page=100&page={page}"
+        )
+
+        response = requests.get(url, headers=HEADERS)
+
+        if response.status_code == 409:
+            break
+
+        if response.status_code != 200:
+            print(f"Skipping {name}: {response.status_code}")
+            break
+
+        commits = response.json()
+
+        if not commits:
+            break
+
+        for commit in commits:
+
+            author = commit.get("commit", {}).get("author", {})
+
+            commit_date = author.get("date")
+
+            if commit_date:
+                dt = datetime.fromisoformat(
+                    commit_date.replace("Z", "+00:00")
+                )
+
+                dates.add(dt.date())
+
+        page += 1
+
+        # Prevent unnecessary API calls
+        if page > 10:
+            break
+
+    return dates
+
+
+def load_data():
+
+    if not os.path.exists(STREAK_FILE):
+        return START_STREAK, None
+
+    with open(STREAK_FILE, "r") as f:
+        lines = f.read().strip().splitlines()
+
+    streak = int(lines[0])
+    last_active = date.fromisoformat(lines[1])
+
+    return streak, last_active
+
+
+def save_data(streak, last_active):
+
+    with open(STREAK_FILE, "w") as f:
+        f.write(f"{streak}\n")
+        f.write(str(last_active))
+
+
+# ------------------------------------------------
+# GET ALL COMMIT DAYS
+# ------------------------------------------------
+
+print("Getting repositories...")
+
+repositories = get_repositories()
+
+print(f"Found {len(repositories)} repositories.")
+
+
+commit_days = set()
+
+for repo in repositories:
+
+    print(f"Checking {repo['full_name']}")
+
+    dates = get_commit_dates(repo)
+
+    commit_days.update(dates)
+
+
+print(f"Found {len(commit_days)} active commit days.")
+
+
+# ------------------------------------------------
+# CALCULATE STREAK
+# ------------------------------------------------
 
 today = date.today()
 
-# Look back 1 year
-start_date = today - timedelta(days=365)
-
-variables = {
-    "from": f"{start_date}T00:00:00Z",
-    "to": f"{today}T23:59:59Z"
-}
+streak, last_active = load_data()
 
 
-payload = json.dumps({
-    "query": query,
-    "variables": variables
-}).encode("utf-8")
+# First run
+if last_active is None:
+
+    if today in commit_days:
+        last_active = today
+        print("Today has a commit.")
+    else:
+        print("No commit today.")
+
+else:
+
+    # Already processed today
+    if today == last_active:
+        print("Already processed today.")
+
+    # Consecutive day
+    elif today == last_active + timedelta(days=1):
+
+        if today in commit_days:
+            streak += 1
+            last_active = today
+            print("🔥 Consecutive commit day!")
+
+        else:
+            print("No commit today. Waiting for next commit.")
+
+    # Missed one or more days
+    elif today > last_active + timedelta(days=1):
+
+        if today in commit_days:
+            streak = 1
+            last_active = today
+            print("❌ Streak broken. Starting again from 1.")
+
+        else:
+            print("No commit today. Streak remains unchanged.")
 
 
-request = urllib.request.Request(
-    "https://api.github.com/graphql",
-    data=payload,
-    headers={
-        "Authorization": f"Bearer {TOKEN}",
-        "Content-Type": "application/json",
-        "User-Agent": "TanmoyDas1724-streak"
-    },
-    method="POST"
-)
+save_data(streak, last_active)
 
 
-with urllib.request.urlopen(request) as response:
-    result = json.loads(response.read().decode("utf-8"))
+# ------------------------------------------------
+# CREATE SVG
+# ------------------------------------------------
 
-
-if "errors" in result:
-    raise RuntimeError(result["errors"])
-
-
-calendar = (
-    result["data"]
-    ["user"]
-    ["contributionsCollection"]
-    ["contributionCalendar"]
-)
-
-
-total_contributions = calendar["totalContributions"]
-private_contributions = calendar["restrictedContributionsCount"]
-
-
-# ---------------------------------------
-# Collect contribution days
-# ---------------------------------------
-
-days = {}
-
-for week in calendar["weeks"]:
-    for contribution_day in week["contributionDays"]:
-
-        day = contribution_day["date"]
-        count = contribution_day["contributionCount"]
-
-        days[day] = count
-
-
-# ---------------------------------------
-# Calculate current streak
-# ---------------------------------------
-
-current_day = today
-
-# If today has no contribution yet,
-# start checking from yesterday.
-if days.get(current_day.isoformat(), 0) == 0:
-    current_day -= timedelta(days=1)
-
-
-streak = 0
-
-while days.get(current_day.isoformat(), 0) > 0:
-    streak += 1
-    current_day -= timedelta(days=1)
-
-
-# ---------------------------------------
-# Print diagnostic information
-# ---------------------------------------
-
-print("====================================")
-print("       GITHUB CODING STREAK")
-print("====================================")
-
-print(f"Username: {USERNAME}")
-print(f"Total contributions: {total_contributions}")
-print(f"Private contributions: {private_contributions}")
-print(f"Current streak: {streak} days")
-
-print("")
-print("Recent contribution days:")
-
-check_day = today
-
-for _ in range(15):
-
-    day_string = check_day.isoformat()
-    count = days.get(day_string, 0)
-
-    print(f"{day_string}: {count} contributions")
-
-    check_day -= timedelta(days=1)
-
-
-print("====================================")
-
-
-# ---------------------------------------
-# Generate SVG
-# ---------------------------------------
-
-svg = f'''<svg width="700" height="220"
+svg = f"""<svg width="700" height="220"
 viewBox="0 0 700 220"
 xmlns="http://www.w3.org/2000/svg">
 
@@ -161,9 +216,9 @@ xmlns="http://www.w3.org/2000/svg">
     x="350"
     y="55"
     text-anchor="middle"
-    font-family="Arial, sans-serif"
+    font-family="Arial"
     font-size="24"
-    fill="#ffffff">
+    fill="white">
 🔥 CODING STREAK
 </text>
 
@@ -171,7 +226,7 @@ xmlns="http://www.w3.org/2000/svg">
     x="350"
     y="125"
     text-anchor="middle"
-    font-family="Arial, sans-serif"
+    font-family="Arial"
     font-size="58"
     font-weight="bold"
     fill="#ff7b72">
@@ -182,28 +237,28 @@ xmlns="http://www.w3.org/2000/svg">
     x="350"
     y="165"
     text-anchor="middle"
-    font-family="Arial, sans-serif"
+    font-family="Arial"
     font-size="18"
     fill="#c9d1d9">
-Public + Private Contributions
+Public + Private Commits
 </text>
 
 <text
     x="350"
     y="195"
     text-anchor="middle"
-    font-family="Arial, sans-serif"
+    font-family="Arial"
     font-size="14"
     fill="#8b949e">
 Tanmoy Das • Keep building. Keep learning.
 </text>
 
 </svg>
-'''
+"""
+
+with open("streak.svg", "w", encoding="utf-8") as f:
+    f.write(svg)
 
 
-with open("streak.svg", "w", encoding="utf-8") as file:
-    file.write(svg)
-
-
-print(f"Generated streak.svg with {streak} days.")
+print(f"\n🔥 CURRENT STREAK: {streak} DAYS")
+print(f"Last active day: {last_active}")
