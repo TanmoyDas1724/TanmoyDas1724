@@ -35,6 +35,18 @@
 🎯 Currently preparing for **AI/ML Internship (2028 Batch)**.
 
 ---
+🔥 Coding Streak
+
+<div align="center">
+
+<img src="./streak.svg" alt="Tanmoy Das Coding Streak"/>
+
+🔥 Continuous Learning • Continuous Building
+
+Public + Private Contributions
+
+</div>
+---
 
 # 🌱 Currently Learning
 
